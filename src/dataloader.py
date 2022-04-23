@@ -1,16 +1,13 @@
 import copy
 import math
-import numpy as np
 import torch
 import torchvision
-from torch import nn
 from torch.utils.data import Dataset, DataLoader
 import typing as t
 import torchvision.transforms as T
 import scipy.stats
-import matplotlib.pyplot as plt
 from torchvision import datasets
-from tqdm import tqdm
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -101,15 +98,18 @@ test_data = datasets.MNIST(
 X_train = train_data.data
 y_train = train_data.targets
 
+X_test = test_data.data
+y_test = test_data.targets
+
+
 data = []
-dataset = MNISTDatasetWeak(X_train, y_train, 1000)
-zb = dataset.prepare_final_data()
+train_dataset = MNISTDatasetWeak(X_train, y_train, 4000)
+test_dataset = MNISTDatasetWeak(X_test, y_test, 500)
 
-for img, lab in zip(zb[0], zb[1]):
-    data.append((img, lab))
 
-#train_dataloader = DataLoader(data, batch_size=64, shuffle=True)
-train_dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
+
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=True)
 
 
 
