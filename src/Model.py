@@ -15,10 +15,10 @@ class ConvNet(nn.Module):
          nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
-        self.linear = nn.Sequential(nn.Linear(361, 2))
+        self.linear = nn.Sequential(nn.Linear(40*40, 2))
 
     def forward(self, x):
         x = self.conv_layers(x)
-        x = x.view(-1, 19*19)
+        x = x.view(-1, 40*40)
         out = self.linear(x)
         return out

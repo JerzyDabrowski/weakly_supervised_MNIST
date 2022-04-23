@@ -12,6 +12,7 @@ from torchvision import datasets
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 BATCH_SIZE = 64
 
+
 class MNISTDatasetWeak(Dataset):
     def __init__(self, org_data: torch.Tensor, org_labels: torch.Tensor, dataset_size: int,
                  transform: t.Optional[bool] = None):
@@ -60,7 +61,7 @@ class MNISTDatasetWeak(Dataset):
             labels = [x[1] for x in tmp]
             label = self._get_label(labels)
             frame = torch.stack(res)
-            target_len = 168
+            target_len = 224
             target_pic = torch.zeros((target_len, target_len))
             rr = torchvision.utils.make_grid(frame.view(frame.size(0), 1, 28, 28), padding=0,
                                              nrow=math.ceil(math.sqrt(frame.shape[0])))[0]

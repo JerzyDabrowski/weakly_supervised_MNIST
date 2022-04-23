@@ -3,7 +3,7 @@ from torch.optim import lr_scheduler
 from tqdm import tqdm
 from Model import ConvNet
 from pretrained_model import resnet
-from dataloader import train_dataloader, test_dataloader
+from resnet_dataloader import train_dataloader, test_dataloader
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -11,7 +11,7 @@ learning_rate = 1e-3
 num_epochs = 20
 
 
-conv_net = ConvNet().to(device)
+conv_net = resnet.to(device)
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(conv_net.parameters(), lr=learning_rate)
 lr_step_scheduler = lr_scheduler.StepLR(optimizer=optimizer, step_size=5, gamma=0.1)
@@ -30,9 +30,9 @@ for epoch in tqdm(range(num_epochs)):
 
         loss.backward()
         optimizer.step()
-        lr_step_scheduler.step()
+        #lr_step_scheduler.step()
 
-        if (i+1) % 100 == 0:
+        if (i+1) % 10 == 0:
             print(f"Epoch {epoch+1}, loss = {loss.item():.5f}")
 
 with torch.no_grad():
