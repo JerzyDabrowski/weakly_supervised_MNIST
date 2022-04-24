@@ -47,11 +47,9 @@ class MNISTDatasetWeak(Dataset):
         sample = my_dist.rvs(size=self.dataset_size).astype('int')
         final_list_of_labels = []
         final_list_of_images = []
-        #list_of_data_with_labels = []
         data_and_labels = list(zip(self.org_data, self.org_labels))
         number_of_images_in_container = sample
         copy_of_data = copy.copy(data_and_labels)
-        # np.random.shuffle(copy_of_data)
         start = 0
         stop = 0
         for idx, n_img in enumerate(number_of_images_in_container):
@@ -62,15 +60,16 @@ class MNISTDatasetWeak(Dataset):
             label = self._get_label(labels)
             frame = torch.stack(res)
             target_len = 224
-            target_pic = torch.zeros((target_len, target_len))
-            rr = torchvision.utils.make_grid(frame.view(frame.size(0), 1, 28, 28), padding=0,
-                                             nrow=math.ceil(math.sqrt(frame.shape[0])))[0]
-            pad_size_vert = int((target_len - rr.size(0)) / 2)
-            pad_size_horiz = int((target_len - rr.size(1)) / 2)
-            target_pic[pad_size_vert:target_len - pad_size_vert, pad_size_horiz:target_len - pad_size_horiz] = rr
+            target_pic = torch.zeros((3, target_len, target_len))
+            rr1 = torchvision.utils.make_grid(frame.view(frame.size(0), 1, 28, 28), padding=0,
+                                              nrow=math.ceil(math.sqrt(frame.shape[0])))
+
+            pad_size_vert = int((target_len - rr1.size(1)) / 2)
+            pad_size_horiz = int((target_len - rr1.size(2)) / 2)
+            rr1 = rr1/255
+            target_pic[:, pad_size_vert:target_len - pad_size_vert, pad_size_horiz:target_len - pad_size_horiz] = rr1
             transform = T.Resize(int(target_len / 1))
-            target_pic = transform(target_pic.unsqueeze(0))
-            #list_of_data_with_labels.append((target_pic, label))
+            target_pic = transform(target_pic)
             start = stop
             # copy_of_data = copy_of_data[n_img:]
             final_list_of_images.append(target_pic)
@@ -82,7 +81,7 @@ class MNISTDatasetWeak(Dataset):
         return self.final_data[idx], self.final_labels[idx]
 
     def __len__(self):
-        return torch.cat(self.final_data).size(0)
+        return len(self.final_data)
 
 
 train_data = datasets.MNIST(
@@ -111,6 +110,3 @@ test_dataset = MNISTDatasetWeak(X_test, y_test, 500)
 
 train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
-
-
-
