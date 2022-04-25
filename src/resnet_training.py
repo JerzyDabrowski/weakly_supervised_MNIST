@@ -58,7 +58,7 @@ for epoch in tqdm(range(NUM_EPOCHS)):
             current_pred = 0
 
         # change lr
-        lr_step_scheduler.step()
+    lr_step_scheduler.step()
 
 torch.save(resnet_model.state_dict(), 'model_resnet.pth')
 board.close()
