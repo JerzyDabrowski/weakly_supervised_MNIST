@@ -1,10 +1,10 @@
-The best test result of 97.2% were obtained using the ResNet18 model with the added 2 fully connected layers at the end. 
+The best test accuracy result of 97.2% was obtained using the ResNet18 model with the added 2 fully connected layers at the end. 
 The activation function for each extra layer was relu.
 The configurations tested were: 
-- 1 additional fully connected layer at the end 0 -> test result ~ 94%
-- ResNet18 with retrained last layer -> test result ~ 95.5%
-- ResNet18 with all layers frozen except the last one zeroed -> test result ~ 93%
-- convolutional network consisting of : -> test result ~ 70%
+- 1 additional fully connected layer at the end 0 -> test result accuracy ~ 94%
+- ResNet18 with retrained last layer -> test result accuracy ~ 95.5%
+- ResNet18 with all layers frozen except the last one zeroed -> test result accuracy ~ 93%
+- convolutional network consisting of : -> test result accuracy ~ 70%
 ```
 class ConvNet(nn.Module):
     def __init__(self):
