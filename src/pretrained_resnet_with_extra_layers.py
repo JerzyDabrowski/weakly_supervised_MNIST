@@ -3,7 +3,7 @@ from torch import nn
 
 
 NUM_CLASSES = 2
-
+# https://pytorch.org/vision/main/_modules/torchvision/models/resnet.html#ResNet18_Weights
 resnet = models.resnet18(pretrained=True)
 last_layer = resnet.fc.in_features
 resnet.fc = nn.Linear(last_layer, 256)
