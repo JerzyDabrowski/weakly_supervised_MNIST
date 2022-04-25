@@ -5,7 +5,7 @@ from tqdm import tqdm
 from resnet_dataloader import train_dataloader, test_dataloader
 from pretrained_resnet_with_extra_layers import resnet_and_fc
 from torch.utils.tensorboard import SummaryWriter
-import sys
+
 
 board = SummaryWriter('tensorboard_res/raport')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
