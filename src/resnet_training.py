@@ -47,7 +47,7 @@ for epoch in tqdm(range(NUM_EPOCHS)):
         _, predicted = torch.max(out.data, 1)
         current_pred += (predicted == labels).sum().item()
 
-        if (i+1) % 1 == 0:
+        if (i+1) % 100 == 0:
             print(f"Epoch {epoch+1}, loss = {loss.item():.5f}")
 
         # Plot accuracy and loss in tensorboard
