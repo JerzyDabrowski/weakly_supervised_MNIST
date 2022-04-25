@@ -10,7 +10,7 @@ from torchvision import datasets
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 
 
 class MNISTDatasetWeak(Dataset):
@@ -23,7 +23,7 @@ class MNISTDatasetWeak(Dataset):
         self.final_data, self.final_labels = self.prepare_final_data()
 
     # https://stackoverflow.com/questions/50626710/generating-random-numbers-with-predefined-mean-std-min-and-max
-    def my_distribution(self, min_val, max_val, mean, std):
+    def create_distribution(self, min_val: float, max_val: float, mean: float, std: float):
         scale = max_val - min_val
         location = min_val
         # Mean and standard deviation of the unscaled beta distribution
@@ -39,41 +39,48 @@ class MNISTDatasetWeak(Dataset):
         # Make scaled beta distribution with computed parameters
         return scipy.stats.beta(alpha, beta, scale=scale, loc=location)
 
-    def _get_label(self, labels):
+    # If number 4 is in the grid, return 1
+    def _get_label_for_grid_image(self, labels: t.List) -> int:
         return 1 if 4 in labels else 0
 
     def prepare_final_data(self) -> t.Tuple:
-        my_dist = self.my_distribution(3, 30, 10, 3)
-        sample = my_dist.rvs(size=self.dataset_size).astype('int')
         final_list_of_labels = []
         final_list_of_images = []
+        distribution = self.create_distribution(3, 30, 10, 3)
+        list_of_images_in_the_grid = distribution.rvs(size=self.dataset_size).astype('int')
         data_and_labels = list(zip(self.org_data, self.org_labels))
-        number_of_images_in_container = sample
         copy_of_data = copy.copy(data_and_labels)
         start = 0
         stop = 0
-        for idx, n_img in enumerate(number_of_images_in_container):
+        for idx, n_img in enumerate(list_of_images_in_the_grid):
             stop += n_img
-            tmp = copy_of_data[start:stop]
-            res = [x[0] for x in tmp]
-            labels = [x[1] for x in tmp]
-            label = self._get_label(labels)
+            # start new loop when stop is greater than loop range
+            if stop >= len(list_of_images_in_the_grid):
+                stop = n_img
+                start = 0
+            temporary_grid_of_data_and_labels = copy_of_data[start:stop]
+            res = [ele[0] for ele in temporary_grid_of_data_and_labels]
+            labels = [ele[1] for ele in temporary_grid_of_data_and_labels]
+            grid_label = self._get_label_for_grid_image(labels)
             frame = torch.stack(res)
+            # set output image size 224x224 for resnet
             target_len = 224
+            # Create tensor of zeros for 3 channels image (Resnet input size)
             target_pic = torch.zeros((3, target_len, target_len))
-            rr1 = torchvision.utils.make_grid(frame.view(frame.size(0), 1, 28, 28), padding=0,
-                                              nrow=math.ceil(math.sqrt(frame.shape[0])))
-
-            pad_size_vert = int((target_len - rr1.size(1)) / 2)
-            pad_size_horiz = int((target_len - rr1.size(2)) / 2)
-            rr1 = rr1/255
-            target_pic[:, pad_size_vert:target_len - pad_size_vert, pad_size_horiz:target_len - pad_size_horiz] = rr1
+            natural_size_grid_image = torchvision.utils.make_grid(frame.view(frame.size(0), 1, 28, 28), padding=0,
+                                                                  nrow=math.ceil(math.sqrt(frame.shape[0])))
+            # Determine the padding size
+            pad_size_vert = int((target_len - natural_size_grid_image.size(1)) / 2)
+            pad_size_horiz = int((target_len - natural_size_grid_image.size(2)) / 2)
+            # Normalization of RGB images
+            natural_size_grid_image = natural_size_grid_image/255
+            target_pic[:, pad_size_vert:target_len - pad_size_vert, pad_size_horiz:target_len - pad_size_horiz] = natural_size_grid_image
+            # possibility to change the image size for other models
             transform = T.Resize(int(target_len / 1))
             target_pic = transform(target_pic)
             start = stop
-            # copy_of_data = copy_of_data[n_img:]
             final_list_of_images.append(target_pic)
-            final_list_of_labels.append(label)
+            final_list_of_labels.append(grid_label)
 
         return final_list_of_images, final_list_of_labels
 
@@ -103,9 +110,8 @@ X_test = test_data.data
 y_test = test_data.targets
 
 
-data = []
-train_dataset = MNISTDatasetWeak(X_train, y_train, 4000)
-test_dataset = MNISTDatasetWeak(X_test, y_test, 500)
+train_dataset = MNISTDatasetWeak(X_train, y_train, 30000)
+test_dataset = MNISTDatasetWeak(X_test, y_test, 1000)
 
 
 train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)

@@ -3,12 +3,10 @@ from torch import nn
 
 
 NUM_CLASSES = 2
+
 resnet = models.resnet18(pretrained=True)
-#
-# resnet.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
 last_layer = resnet.fc.in_features
 resnet.fc = nn.Linear(last_layer, 256)
-
 # Added fully connected layers on the end
 
 
@@ -28,5 +26,6 @@ class FcNet(nn.Module):
         return out
 
 
+# combine models into one
 end_of_net = FcNet()
 resnet_and_fc = nn.Sequential(resnet, end_of_net)
